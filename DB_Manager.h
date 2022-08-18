@@ -10,6 +10,7 @@ public:
 	typedef std::map<int, Item> itemMap;
 	static systemMap getSystems();
 	static itemMap getItems();
+	static void writeResults(std::vector<Difference> input);
 };
 
 systemMap DB_Manager::getSystems()
@@ -74,4 +75,50 @@ itemMap DB_Manager::getItems()
 	sqlite3_close(db);
 
 	return sys;
+}
+
+void DB_Manager::writeResults(std::vector<Difference> input)
+{
+	sqlite3* db;
+	sqlite3_stmt* stmt = NULL;
+	char* str;
+	char* zErrMsg = 0;
+	int rc;
+	std::string sql;
+
+	rc = sqlite3_open("database.db", &db);
+	if (rc) {
+		fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+	}
+
+	rc = sqlite3_exec(db, "DELETE FROM RESULTS", NULL, 0, &zErrMsg);
+	if (rc != SQLITE_OK) {
+		fprintf(stderr, "SQL error: %s\n", zErrMsg);
+		sqlite3_free(zErrMsg);
+	}
+
+	for (auto it = input.begin(); it != input.end(); it++)
+	{
+		sql = "INSERT OR IGNORE INTO RESULTS VALUES ('" +
+			(*it).buy.item_name + "', " +
+			std::to_string((*it).quantity) + ", " +
+			std::to_string((*it).diff) + ", " +
+			std::to_string((*it).totaldiff) + ", " +
+			std::to_string((*it).diff_per_jump) + ", " +
+			std::to_string((*it).buy.price) + ", " +
+			std::to_string((*it).sell.price) + ", '" +
+			(*it).buy.system_name + "', '" +
+			(*it).sell.system_name + "', " +
+			std::to_string((*it).totalvolume) + ")";
+
+
+		rc = sqlite3_exec(db, sql.c_str(), NULL, 0, &zErrMsg);
+
+		if (rc != SQLITE_OK) {
+			fprintf(stderr, "SQL error: %s\n", zErrMsg);
+			sqlite3_free(zErrMsg);
+		}
+	}
+
+	sqlite3_close(db);
 }
