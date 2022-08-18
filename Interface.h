@@ -102,6 +102,7 @@ void Interface::menu()
 	std::cout << "max volume: " << volume << std::endl;
 	std::cout << "highsec only: " << safe << std::endl << std::endl;
 
+	DB_Manager::writeResults(outp);
 	for (auto it = outp.begin(); it != outp.end(); it++)
 	{
 		std::cout << (*it) << std::endl;

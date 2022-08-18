@@ -11,7 +11,7 @@ public:
 	static Buy_Type_Value downloadOrderData();
 	static Item downloadItemData(int id);
 	static System downloadSystemData(int id);
-	static void getroute(Difference& inp);
+	static void getroute(Difference& inp, bool safe);
 };
 
 Buy_Type_Value Downloader::downloadOrderData(std::pair<int, std::string> region)
@@ -394,11 +394,14 @@ System Downloader::downloadSystemData(int id)
 	return res;
 }
 
-void Downloader::getroute(Difference& inp)
+void Downloader::getroute(Difference& inp, bool safe)
 {
+	std::string flag;
+	if (safe) flag = "secure";
+	else flag = "shortest";
 	std::string url = "https://esi.evetech.net/latest/route/" + std::to_string(inp.sell.system_id) + "/" + std::to_string(inp.buy.system_id) + "/";
 	auto r = cpr::Get(cpr::Url{ url },
-		cpr::Parameters{ {"datasource","tranquility"}, {"flag", "shortest"}});
+		cpr::Parameters{ {"datasource","tranquility"}, {"flag", flag}});
 	Json::Value json;
 	Json::Reader reader;
 
